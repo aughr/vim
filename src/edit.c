@@ -2782,6 +2782,27 @@ set_completion(startcol, list)
     out_flush();
 }
 
+/*
+ * Start user completion from the complete_start() function.
+ *
+ * No error messages will be shown.
+ */
+    int
+start_user_completion()
+{
+    int save_msg_silent = msg_silent,
+	return_value;
+
+    msg_silent = TRUE;
+    ins_ctrl_x();
+    ins_compl_prep(Ctrl_U);
+    ins_complete(Ctrl_N);
+    return_value = ins_complete(Ctrl_P);
+    msg_silent = save_msg_silent;
+    return return_value;
+
+}
+
 
 /* "compl_match_array" points the currently displayed list of entries in the
  * popup menu.  It is NULL when there is no popup menu. */
@@ -5519,17 +5540,21 @@ ins_complete(c)
 	}
     }
 
-    /* Show a message about what (completion) mode we're in. */
-    showmode();
-    if (edit_submode_extra != NULL)
+    /* Show a message about what (completion) mode we're in unless we're
+     * silenced. */
+    if (msg_silent == 0)
     {
-	if (!p_smd)
-	    msg_attr(edit_submode_extra,
-		    edit_submode_highl < HLF_COUNT
-		    ? hl_attr(edit_submode_highl) : 0);
+	showmode();
+	if (edit_submode_extra != NULL)
+	{
+	    if (!p_smd)
+		msg_attr(edit_submode_extra,
+			edit_submode_highl < HLF_COUNT
+			? hl_attr(edit_submode_highl) : 0);
+	}
+	else
+	    msg_clr_cmdline();	/* necessary for "noshowmode" */
     }
-    else
-	msg_clr_cmdline();	/* necessary for "noshowmode" */
 
     /* Show the popup menu, unless we got interrupted. */
     if (!compl_interrupted)

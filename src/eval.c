@@ -488,6 +488,7 @@ static void f_col __ARGS((typval_T *argvars, typval_T *rettv));
 static void f_complete __ARGS((typval_T *argvars, typval_T *rettv));
 static void f_complete_add __ARGS((typval_T *argvars, typval_T *rettv));
 static void f_complete_check __ARGS((typval_T *argvars, typval_T *rettv));
+static void f_complete_user __ARGS((typval_T *argvars, typval_T *rettv));
 #endif
 static void f_confirm __ARGS((typval_T *argvars, typval_T *rettv));
 static void f_copy __ARGS((typval_T *argvars, typval_T *rettv));
@@ -7873,6 +7874,7 @@ static struct fst
     {"complete",	2, 2, f_complete},
     {"complete_add",	1, 1, f_complete_add},
     {"complete_check",	0, 0, f_complete_check},
+    {"complete_user",   0, 0, f_complete_user},
 #endif
     {"confirm",		1, 4, f_confirm},
     {"copy",		1, 1, f_copy},
@@ -9496,6 +9498,23 @@ f_complete_check(argvars, rettv)
     ins_compl_check_keys(0);
     rettv->vval.v_number = compl_interrupted;
     RedrawingDisabled = saved;
+}
+
+/*
+ * "complete_user()" function
+ */
+    static void
+f_complete_user(argvars, rettv)
+    typval_T	*argvars;
+    typval_T	*rettv;
+{
+    if ((State & INSERT) == 0)
+    {
+	EMSG(_("E785: complete() can only be used in Insert mode"));
+	return;
+    }
+
+    rettv->vval.v_number = start_user_completion();
 }
 #endif
 
